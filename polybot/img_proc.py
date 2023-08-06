@@ -52,6 +52,14 @@ class Img:
 
     def rotate(self):
         # TODO remove the `raise` below, and write your implementation
+        def rotate(self):
+            mat = []
+            for i in range(len(self.data[0])):
+                arr = []
+                for j in range(len(self.data) - 1, -1, -1):
+                    arr.append(self.data[j][i])
+                mat.append(arr)
+            self.data = mat
         raise NotImplementedError()
 
     def salt_n_pepper(self):
@@ -65,3 +73,8 @@ class Img:
     def segment(self):
         # TODO remove the `raise` below, and write your implementation
         raise NotImplementedError()
+
+
+if __name__ == '__main__':
+    my_img = Img('/home/amir/Pictures/IMG-20230328-WA0044.jpg')
+    my_img.save_img()

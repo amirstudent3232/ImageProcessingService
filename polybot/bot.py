@@ -76,4 +76,42 @@ class QuoteBot(Bot):
 
 
 class ImageProcessingBot(Bot):
-    pass
+    def __init__(self, token, telegram_chat_url):
+        super().__init__(token, telegram_chat_url)
+
+    def handle_message(self, message):
+        if not self.is_current_msg_photo(message):
+            raise RuntimeError(f'Message content of type \'photo\' expected')
+
+        filter_name = message.get('caption', '').lower()
+        if 'salt' in filter_name and 'pepper' in filter_name:
+            filter_name = 'salt_n_pepper'
+
+        if filter_name in ['blur', 'contour', 'rotate', 'segment', 'salt_n_pepper']:
+            self.process_and_send_image(message, filter_name)
+        else:
+            self.send_text(message['chat']['id'], "Invalid filter name. Please provide a valid filter name.")
+
+    def process_and_send_image(self, message, filter_name):
+        user_id = message['from']['id']
+        image_path = self.download_user_photo(message)
+        try:
+            img = Img(image_path)
+
+            if filter_name == 'blur':
+                img.blur()
+            elif filter_name == 'contour':
+                img.contour()
+            elif filter_name == 'rotate':
+                img.rotate()
+            elif filter_name == 'segment':
+                img.segment()
+            elif filter_name == 'salt_n_pepper':
+                img.salt_n_pepper()
+
+            # Save and send the processed image
+            processed_image_path = img.save_img()
+            self.send_photo(user_id, processed_image_path)
+        except RuntimeError as e:
+            self.send_text(user_id, str(e))
+

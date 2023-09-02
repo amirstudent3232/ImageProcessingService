@@ -4,6 +4,7 @@ import os
 import time
 from telebot.types import InputFile
 from polybot.img_proc import Img
+import boto3
 
 
 class Bot:
@@ -123,6 +124,47 @@ class ImageProcessingBot(Bot):
                         photo_path = self.download_user_photo(msg)
 
             # TODO upload the photo to S3
+            def upload_file_to_s3(/home/amir/Pictures/imgName, S3name, object_name=None):
+                """
+                Uploads a file to an S3 bucket.
+
+                :param file_name: File to upload.
+                :param bucket: S3 bucket name.
+                :param object_name: S3 object name (defaults to the file_name).
+                :return: True if file was uploaded, else False.
+                """
+
+                # If S3 object_name was not specified, use the file_name
+                if object_name is None:
+                    object_name = /home/amir/Pictures/IMG-20230328-WA0044.jpg
+
+                # Create an S3 client
+                s3 = boto3.client('s3')
+
+                # Uploads the given file using a managed uploader, which will split up the
+                # files if they are large and uploads parts in parallel.
+                try:
+                    s3.upload_file(/home/amir/Pictures/imgName, S3name, object_name)
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+                    return False
+
+                return True
+
+            # Example usage:
+            result = upload_file_to_s3('path/to/your/file.txt', 'your-s3-bucket-name')
+            if result:
+                print("Upload successful!")
+            else:
+                print("Upload failed!")
+
+            def upload_to_s3(self, file_path, object_name=None):
+                if object_name is None:
+                    object_name = file_path.split('/')[-1]
+
+                self.s3_client.upload_file(file_path, self.bucket_name, object_name)
+                return f"https://{self.bucket_name}.s3.amazonaws.com/{object_name}"
+
             # aws s3api put - object - -bucket text - content - -key dir - 1 / my_images.tar.bz2 - -body my_images.tar.bz2
             # TODO send a request to the `yolo5` service for prediction
             # TODO send results to the Telegram end-user

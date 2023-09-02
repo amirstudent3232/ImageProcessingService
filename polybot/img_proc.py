@@ -1,6 +1,7 @@
-import random
-from pathlib import Path
-from matplotlib.image import imread, imsave
+from random import random
+
+import boto3
+import pymongo
 
 
 def rgb2gray(rgb):

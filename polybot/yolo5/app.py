@@ -171,7 +171,6 @@ def predict():
 
         # end
 
-
         return prediction_summary
     else:
         return f'prediction: {prediction_id}/{original_img_path}. prediction result not found', 404

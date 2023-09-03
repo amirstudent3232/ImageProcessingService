@@ -8,7 +8,7 @@ import yaml
 from loguru import logger
 import os
 import boto3
-
+from pymongo import MongoClient
 
 images_bucket = os.environ['BUCKET_NAME']
 
@@ -29,7 +29,7 @@ def predict():
 
     # TODO download img_name from S3, store the local image path in original_img_path
     #  The bucket name should be provided as an env var BUCKET_NAME.
-
+    # start
     def upload_predicted_image_to_s3(predicted_img_path, original_img_name):
         """
         Uploads the predicted image to S3 ensuring not to overwrite the original.
@@ -61,6 +61,8 @@ def predict():
     s3_url = upload_predicted_image_to_s3('/local/path/to/predicted_image.jpg', 'original_image_name.jpg')
     print(f"Predicted image uploaded to: {s3_url}")
 
+    # end
+
 
     original_img_path = ...
 
@@ -83,6 +85,39 @@ def predict():
     predicted_img_path = Path(f'static/data/{prediction_id}/{original_img_path}')
 
     # TODO Uploads the predicted image (predicted_img_path) to S3 (be careful not to override the original image).
+    # start
+    def upload_predicted_image_to_s3(predicted_img_path, s3_bucket, original_img_name):
+        """
+        Uploads the predicted image to S3 without overwriting the original image.
+
+        :param predicted_img_path: Local path of the predicted image.
+        :param s3_bucket: The name of the S3 bucket to upload to.
+        :param original_img_name: The name of the original image for reference.
+        :return: S3 object key (path) for the uploaded image.
+        """
+
+        # Generate a unique identifier to append to the original filename.
+        unique_id = uuid.uuid4().hex
+        s3_key = f"predictions/{original_img_name}_predicted_{unique_id}.jpg"
+
+        # Create an S3 client
+        s3 = boto3.client('s3')
+
+        # Upload the predicted image using the unique S3 key
+        s3.upload_file(predicted_img_path, s3_bucket, s3_key)
+
+        return s3_key
+
+    # Usage example:
+    s3_bucket = os.environ['BUCKET_NAME']
+    predicted_img_local_path = "/path/to/your/predicted/image.jpg"
+    original_img_name = "original_image_name"
+
+    s3_object_key = upload_predicted_image_to_s3(predicted_img_local_path, s3_bucket, original_img_name)
+    print(f"Predicted image uploaded to S3 with key: {s3_object_key}")
+
+    # end
+
 
     # Parse prediction labels and create a summary
     pred_summary_path = Path(f'static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
@@ -109,6 +144,33 @@ def predict():
         }
 
         # TODO store the prediction_summary in MongoDB
+        # start
+        def store_prediction_in_mongo(prediction_summary):
+            # Connect to MongoDB running in Docker (default IP is 172.17.0.2 for the first container, but you might need to adjust depending on your setup)
+            client = MongoClient("mongodb://172.17.0.2:27017/")
+
+            # Select your database (replace "your_database" with your desired DB name)
+            db = client["your_database"]
+
+            # Select the collection (replace "your_collection" with your desired collection name)
+            predictions = db["your_collection"]
+
+            # Insert the prediction_summary
+            predictions.insert_one(prediction_summary)
+
+        # Example usage
+        prediction_summary = {
+            'prediction_id': '123456',
+            'original_img_path': '/path/to/original/img.jpg',
+            'predicted_img_path': '/path/to/predicted/img.jpg',
+            'labels': [{'class': 'dog', 'confidence': 0.95}],
+            'time': 1234567890.0
+        }
+
+        store_prediction_in_mongo(prediction_summary)
+
+        # end
+
 
         return prediction_summary
     else:

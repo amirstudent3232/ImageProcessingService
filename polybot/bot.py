@@ -3,15 +3,12 @@ from loguru import logger
 import os
 import time
 from telebot.types import InputFile
-from polybot.img_proc import Img
-import requests
-import boto3
-import json
+
 
 class Bot:
 
     def __init__(self, token, telegram_chat_url):
-        # create new instance of the TeleBot class.
+        # create a new instance of the TeleBot class.
         # all communication with Telegram servers are done using self.telegram_bot_client
         self.telegram_bot_client = telebot.TeleBot(token)
 
@@ -36,7 +33,6 @@ class Bot:
     def download_user_photo(self, msg):
         """
         Downloads the photos that sent to the Bot to `photos` directory (should be existed)
-        :param quality: integer representing the file quality. Allowed values are [0, 1, 2]
         :return:
         """
         if not self.is_current_msg_photo(msg):
@@ -69,55 +65,17 @@ class Bot:
         self.send_text(msg['chat']['id'], f'Your original message: {msg["text"]}')
 
 
-class QuoteBot(Bot):
+# TODO upload the photo to S3
+# TODO send a request to the `yolo5` service for prediction
+# TODO send results to the Telegram end-user
+class ObjectDetectionBot(Bot):
     def handle_message(self, msg):
         logger.info(f'Incoming message: {msg}')
 
-        if msg["text"] != 'Please don\'t quote me':
-            self.send_text_with_quote(msg['chat']['id'], msg["text"], quoted_msg_id=msg["message_id"])
+        if self.is_current_msg_photo(msg):
+            photo_path = self.download_user_photo(msg)
 
-
-class ImageProcessingBot(Bot):
-    def __init__(self, token, telegram_chat_url):
-        super().__init__(token, telegram_chat_url)
-
-    def handle_message(self, message):
-        if not self.is_current_msg_photo(message):
-            raise RuntimeError(f'Message content of type \'photo\' expected')
-
-        filter_name = message.get('caption', '').lower()
-        if 'salt' in filter_name and 'pepper' in filter_name:
-            filter_name = 'salt_n_pepper'
-
-        if filter_name in ['blur', 'contour', 'rotate', 'segment', 'salt_n_pepper']:
-            self.process_and_send_image(message, filter_name)
-        else:
-            self.send_text(message['chat']['id'], "Invalid filter name. Please provide a valid filter name.")
-
-    def process_and_send_image(self, message, filter_name):
-        user_id = message['from']['id']
-        image_path = self.download_user_photo(message)
-        try:
-            img = Img(image_path)
-
-            if filter_name == 'blur':
-                img.blur()
-            elif filter_name == 'contour':
-                img.contour()
-            elif filter_name == 'rotate':
-                img.rotate()
-            elif filter_name == 'segment':
-                img.segment()
-            elif filter_name == 'salt_n_pepper':
-                img.salt_n_pepper()
-
-            # Save and send the processed image
-            processed_image_path = img.save_img()
-            self.send_photo(user_id, processed_image_path)
-        except RuntimeError as e:
-            self.send_text(user_id, str(e))
-
-class ObjectDetectionBot(Bot):
+            class ObjectDetectionBot(Bot):
     def __init__(self, token, telegram_chat_url):
         super().__init__(token, telegram_chat_url)
         self.s3_client = boto3.client('s3')
@@ -128,7 +86,7 @@ class ObjectDetectionBot(Bot):
 
         if self.is_current_msg_photo(msg):
             photo_download = self.download_user_photo(msg)
-            s3_bucket = "S3name"
+            s3_bucket = "moshikosbucket"
             img_name = f'tg-photos/{photo_download}'
             self.s3_client.upload_file(photo_download, s3_bucket, img_name)
             yolo_summary = self.yolo5_request(img_name)  # Get YOLOv5 summary

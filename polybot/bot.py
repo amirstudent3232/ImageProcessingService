@@ -11,7 +11,7 @@ import json
 class Bot:
 
     def __init__(self, token, telegram_chat_url):
-        # create a new instance of the TeleBot class.
+        # create new instance of the TeleBot class.
         # all communication with Telegram servers are done using self.telegram_bot_client
         self.telegram_bot_client = telebot.TeleBot(token)
 
@@ -155,3 +155,4 @@ class ObjectDetectionBot(Bot):
         else:
             logger.error(f'Error response from YOLOv5 API: {response.status_code} - {response.text}')
             return {"error": f"Error response from YOLOv5 API: {response.status_code}"}
+

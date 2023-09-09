@@ -1,3 +1,7 @@
+import json
+
+import boto3
+import requests
 import telebot
 from loguru import logger
 import os
@@ -75,7 +79,7 @@ class ObjectDetectionBot(Bot):
         if self.is_current_msg_photo(msg):
             photo_path = self.download_user_photo(msg)
 
-            class ObjectDetectionBot(Bot):
+class ObjectDetectionBot(Bot):
     def __init__(self, token, telegram_chat_url):
         super().__init__(token, telegram_chat_url)
         self.s3_client = boto3.client('s3')

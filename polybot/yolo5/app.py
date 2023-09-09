@@ -93,8 +93,8 @@ def predict():
         cluster = os.environ['CLUSTERSTRING']
         mongo_client = pymongo.MongoClient(cluster)
 
-        db = mongo_client['MoshikoDB']
-        collection = db['MoshikoCollection']
+        db = mongo_client['shermanDB']
+        collection = db['shermanCollection']
 
         result = collection.insert_one(prediction_summary)
 

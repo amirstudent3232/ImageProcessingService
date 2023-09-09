@@ -4,8 +4,9 @@ import os
 import time
 from telebot.types import InputFile
 from polybot.img_proc import Img
+import requests
 import boto3
-
+import json
 
 class Bot:
 
@@ -116,55 +117,41 @@ class ImageProcessingBot(Bot):
         except RuntimeError as e:
             self.send_text(user_id, str(e))
 
-            class ObjectDetectionBot(Bot):
-                def handle_message(self, msg):
-                    logger.info(f'Incoming message: {msg}')
+class ObjectDetectionBot(Bot):
+    def __init__(self, token, telegram_chat_url):
+        super().__init__(token, telegram_chat_url)
+        self.s3_client = boto3.client('s3')
+        self.default_response = "Sorry, I didn't understand that. Type /help for available commands."
 
-                    if self.is_current_msg_photo(msg):
-                        photo_path = self.download_user_photo(msg)
+    def handle_message(self, msg):
+        logger.info(f'Incoming message: {msg}')
 
-            # TODO upload the photo to S3
-            def upload_file_to_s3(/home/amir/Pictures/imgName, S3name, object_name=None):
-                """
-                Uploads a file to an S3 bucket.
+        if self.is_current_msg_photo(msg):
+            photo_download = self.download_user_photo(msg)
+            s3_bucket = "S3name"
+            img_name = f'tg-photos/{photo_download}'
+            self.s3_client.upload_file(photo_download, s3_bucket, img_name)
+            yolo_summary = self.yolo5_request(img_name)  # Get YOLOv5 summary
+            self.send_summary_to_user(msg['chat']['id'], yolo_summary)  # Send the summary to the user
 
-                :param file_name: File to upload.
-                :param bucket: S3 bucket name.
-                :param object_name: S3 object name (defaults to the file_name).
-                :return: True if file was uploaded, else False.
-                """
+    def send_summary_to_user(self, chat_id, summary):
+        # Format the YOLOv5 summary as a string
+        summary_str = json.dumps(summary, indent=4)
 
-                # If S3 object_name was not specified, use the file_name
-                if object_name is None:
-                    object_name = /home/amir/Pictures/IMG-20230328-WA0044.jpg
+        # Send the summary to the user
+        self.send_text(chat_id, summary_str)
 
-                # Create an S3 client
-                s3 = boto3.client('s3')
+    def yolo5_request(self, s3_photo_path):
+        yolo5_api = "http://localhost:8081/predict"
+        response = requests.post(f"{yolo5_api}?imgName={s3_photo_path}")
 
-                # Uploads the given file using a managed uploader, which will split up the
-                # files if they are large and uploads parts in parallel.
-                try:
-                    s3.upload_file(/home/amir/Pictures/imgName, S3name, object_name)
-                except Exception as e:
-                    print(f"An error occurred: {e}")
-                    return False
+        if response.status_code == 200:
+            try:
+                return response.json()  # Attempt to parse the JSON response
+            except json.JSONDecodeError as e:
+                logger.error(f'Failed to decode JSON response: {e}')
+                return {"error": "Invalid JSON response from YOLOv5 API"}
 
-                return True
-
-            # Example usage:
-            result = upload_file_to_s3('path/to/your/file.txt', 'your-s3-bucket-name')
-            if result:
-                print("Upload successful!")
-            else:
-                print("Upload failed!")
-
-            def upload_to_s3(self, file_path, object_name=None):
-                if object_name is None:
-                    object_name = file_path.split('/')[-1]
-
-                self.s3_client.upload_file(file_path, self.bucket_name, object_name)
-                return f"https://{self.bucket_name}.s3.amazonaws.com/{object_name}"
-
-            # aws s3api put - object - -bucket text - content - -key dir - 1 / my_images.tar.bz2 - -body my_images.tar.bz2
-            # TODO send a request to the `yolo5` service for prediction
-            # TODO send results to the Telegram end-user
+        else:
+            logger.error(f'Error response from YOLOv5 API: {response.status_code} - {response.text}')
+            return {"error": f"Error response from YOLOv5 API: {response.status_code}"}

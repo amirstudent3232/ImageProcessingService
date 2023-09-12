@@ -77,13 +77,13 @@ def predict():
 
     # TODO Uploads the predicted image (predicted_img_path) to S3 (be careful not to override the original image).
 
-    predicted_img_name = f'predicted_{filename}'  # assign the new name
+    new_img_name = f'new_{filename}'  # assign the new name
     os.rename(f'/usr/src/app/static/data/{prediction_id}/{filename}',
-              f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}')  # rename the file before upload
-    s3_path_to_upload_to = '/'.join(img_name.split('/')[:-1]) + f'/{predicted_img_name}'  # assign the path on s3 as str
-    file_to_upload = f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}'  # assign the path locally as str
+              f'/usr/src/app/static/data/{prediction_id}/{new_img_name}')  # rename the file before upload
+    s3_path_to_upload_to = '/'.join(img_name.split('/')[:-1]) + f'/{new_img_name}'  # assign the path on s3 as str
+    file_to_upload = f'/usr/src/app/static/data/{prediction_id}/{new_img_name}'  # assign the path locally as str
     s3.upload_file(file_to_upload, images_bucket, s3_path_to_upload_to)  # upload the file to same path with new name s3
-    os.rename(f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}',
+    os.rename(f'/usr/src/app/static/data/{prediction_id}/{new_img_name}',
               f'/usr/src/app/static/data/{prediction_id}/{filename}')  # rename the file back after upload
 
     # /usr/src/app/static/data/c98f54ac-bbf2-407f-aa88-4e5685520e8c/labels/street.txt - path in container

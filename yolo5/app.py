@@ -77,7 +77,7 @@ def predict():
 
     # TODO Uploads the predicted image (predicted_img_path) to S3 (be careful not to override the original image).
 
-    new_img_name = f'new_{filename}'  # assign the new name
+    decoded_img_name = f'{filename}_decoded'  # assign the new name
     os.rename(f'/usr/src/app/static/data/{prediction_id}/{filename}',
               f'/usr/src/app/static/data/{prediction_id}/{new_img_name}')  # rename the file before upload
     s3_path_to_upload_to = '/'.join(img_name.split('/')[:-1]) + f'/{new_img_name}'  # assign the path on s3 as str

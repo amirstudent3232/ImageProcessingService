@@ -1,4 +1,3 @@
-import time
 from pathlib import Path
 from flask import Flask, request, jsonify
 from detect import run

@@ -83,7 +83,6 @@ class QuoteBot(Bot):
 def swear_words_github():
     repo = ('https://raw.githubusercontent.com/MoshikoZana/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words'
             '/master/en')
-    repo = ('my repo path')
     response = requests.get(repo)
     if response.status_code == 200:
         swear_words = [line.strip() for line in response.text.split('\n')]
@@ -135,7 +134,7 @@ class ObjectDetectionBot(Bot):
             else:
                 # If no filter keyword is found, perform object detection
                 photo_download = self.download_user_photo(msg)
-                s3_bucket = "sherman3bucket"
+                s3_bucket = "moshikosbucket"
                 img_name = f'tg-photos/{photo_download}'
                 self.s3_client.upload_file(photo_download, s3_bucket, img_name)
                 yolo_summary = self.yolo5_request(img_name)  # Get YOLOv5 summary
@@ -146,7 +145,7 @@ class ObjectDetectionBot(Bot):
             if 'text' in msg:
                 message = msg['text'].lower()
 
-               """ if message.startswith('/start'):
+                if message.startswith('/start'):
                     start_response = "Hey there! Welcome to Image Processing Bot! For available commands type \"/help\""
                     self.send_text(msg['chat']['id'], start_response)
 
@@ -157,8 +156,7 @@ class ObjectDetectionBot(Bot):
                         "concat and segment. To use object detection, upload a photo without a caption.")
                     self.send_text(msg['chat']['id'], help_response)
                 else:
-                """
-                self.handle_non_command(msg, message)
+                    self.handle_non_command(msg, message)
 
     def yolo5_request(self, s3_photo_path):
         yolo5_api = "http://localhost:8081/predict"

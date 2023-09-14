@@ -119,7 +119,7 @@ def predict():
         json_data = json.dumps(prediction_summary)
 
         client = pymongo.MongoClient(mongo_string)
-        db = client["shermanmongoDB"]
+        db = client["mongo1"]
         collection = db["Yolo5"]
         collection.insert_one(prediction_summary)
 

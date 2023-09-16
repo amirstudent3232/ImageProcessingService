@@ -44,7 +44,7 @@ def predict():
 
     # Predicts the objects in the image
     result = run(
-        weights='yolov5s.pt',
+        weights='yolo5.pt',
         data='data/coco128.yaml',
         source=original_img_path,
         project='static/data',
@@ -52,21 +52,6 @@ def predict():
         save_txt=True
     )
 
-    # detected_objects = result.get("labels", [])
-    # object_counts = {}
-    # custom_response = "The detected image contains: "
-    #
-    # for label in detected_objects:
-    #     object_class = label['class']
-    #     if object_class in object_counts:
-    #         object_counts[object_class] += 1
-    #     else:
-    #         object_counts[object_class] = 1
-    #
-    # for object_class, count in object_counts.items():
-    #     custom_response += f"{object_class}: {count}"
-    #
-    # custom_response = custom_response.rstrip(', ')
 
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. done')
 
@@ -85,12 +70,6 @@ def predict():
     os.rename(f'/usr/src/app/static/data/{prediction_id}/{decoded_img_name}',
               f'/usr/src/app/static/data/{prediction_id}/{filename}')  # rename the file back after upload
 
-    # /usr/src/app/static/data/c98f54ac-bbf2-407f-aa88-4e5685520e8c/labels/street.txt - path in container
-
-    # /usr/src/app/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
-    # /usr/src/apps/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
-
-    # Parse prediction labels and create a summary
     pred_summary_path = Path(f'/usr/src/app/static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. pred_path: {pred_summary_path} debug!!!')
     if pred_summary_path.exists():

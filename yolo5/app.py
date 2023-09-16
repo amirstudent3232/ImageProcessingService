@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from flask import Flask, request, jsonify
 from detect import run
@@ -52,6 +53,21 @@ def predict():
         save_txt=True
     )
 
+    # detected_objects = result.get("labels", [])
+    # object_counts = {}
+    # custom_response = "The detected image contains: "
+    #
+    # for label in detected_objects:
+    #     object_class = label['class']
+    #     if object_class in object_counts:
+    #         object_counts[object_class] += 1
+    #     else:
+    #         object_counts[object_class] = 1
+    #
+    # for object_class, count in object_counts.items():
+    #     custom_response += f"{object_class}: {count}"
+    #
+    # custom_response = custom_response.rstrip(', ')
 
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. done')
 
@@ -61,15 +77,21 @@ def predict():
 
     # TODO Uploads the predicted image (predicted_img_path) to S3 (be careful not to override the original image).
 
-    decoded_img_name = f'{filename}_decoded'  # assign the new name
+    predicted_img_name = f'predicted_{filename}'  # assign the new name
     os.rename(f'/usr/src/app/static/data/{prediction_id}/{filename}',
-              f'/usr/src/app/static/data/{prediction_id}/{decoded_img_name}')  # rename the file before upload
-    s3_path_to_upload_to = '/'.join(img_name.split('/')[:-1]) + f'/{decoded_img_name}'  # assign the path on s3 as str
-    file_to_upload = f'/usr/src/app/static/data/{prediction_id}/{decoded_img_name}'  # assign the path locally as str
+              f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}')  # rename the file before upload
+    s3_path_to_upload_to = '/'.join(img_name.split('/')[:-1]) + f'/{predicted_img_name}'  # assign the path on s3 as str
+    file_to_upload = f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}'  # assign the path locally as str
     s3.upload_file(file_to_upload, images_bucket, s3_path_to_upload_to)  # upload the file to same path with new name s3
-    os.rename(f'/usr/src/app/static/data/{prediction_id}/{decoded_img_name}',
+    os.rename(f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}',
               f'/usr/src/app/static/data/{prediction_id}/{filename}')  # rename the file back after upload
 
+    # /usr/src/app/static/data/c98f54ac-bbf2-407f-aa88-4e5685520e8c/labels/street.txt - path in container
+
+    # /usr/src/app/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
+    # /usr/src/apps/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
+
+    # Parse prediction labels and create a summary
     pred_summary_path = Path(f'/usr/src/app/static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. pred_path: {pred_summary_path} debug!!!')
     if pred_summary_path.exists():
@@ -98,7 +120,7 @@ def predict():
         json_data = json.dumps(prediction_summary)
 
         client = pymongo.MongoClient(mongo_string)
-        db = client["mongo1"]
+        db = client["MoshikoDB"]
         collection = db["Yolo5"]
         collection.insert_one(prediction_summary)
 

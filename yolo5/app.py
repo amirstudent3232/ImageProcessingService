@@ -12,7 +12,7 @@ import pymongo
 import json
 
 images_bucket = os.environ['BUCKET_NAME']
-mongo_string = os.environ['MONGOCLIENT']
+mongo_string = os.environ['MONGOCLITE']
 with open("data/coco128.yaml", "r") as stream:
     names = yaml.safe_load(stream)['names']
 
@@ -52,22 +52,6 @@ def predict():
         name=prediction_id,
         save_txt=True
     )
-
-    # detected_objects = result.get("labels", [])
-    # object_counts = {}
-    # custom_response = "The detected image contains: "
-    #
-    # for label in detected_objects:
-    #     object_class = label['class']
-    #     if object_class in object_counts:
-    #         object_counts[object_class] += 1
-    #     else:
-    #         object_counts[object_class] = 1
-    #
-    # for object_class, count in object_counts.items():
-    #     custom_response += f"{object_class}: {count}"
-    #
-    # custom_response = custom_response.rstrip(', ')
 
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. done')
 
@@ -120,7 +104,7 @@ def predict():
         json_data = json.dumps(prediction_summary)
 
         client = pymongo.MongoClient(mongo_string)
-        db = client["MoshikoDB"]
+        db = client["mongo1"]
         collection = db["Yolo5"]
         collection.insert_one(prediction_summary)
 

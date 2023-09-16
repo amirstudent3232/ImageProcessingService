@@ -45,7 +45,7 @@ def predict():
 
     # Predicts the objects in the image
     result = run(
-        weights='yolo5.pt',
+        weights='yolov5s.pt',
         data='data/coco128.yaml',
         source=original_img_path,
         project='static/data',
@@ -115,6 +115,5 @@ def predict():
     else:
         return f'prediction: {prediction_id}/{original_img_path}. prediction result not found', 404
 """
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8081)

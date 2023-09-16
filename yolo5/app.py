@@ -12,7 +12,7 @@ import pymongo
 import json
 
 images_bucket = os.environ['BUCKET_NAME']
-mongo_string = os.environ['MONGOCLITE']
+# mongo_string = os.environ['MONGOCLITE']
 with open("data/coco128.yaml", "r") as stream:
     names = yaml.safe_load(stream)['names']
 
@@ -76,6 +76,7 @@ def predict():
     # /usr/src/apps/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
 
     # Parse prediction labels and create a summary
+    """
     pred_summary_path = Path(f'/usr/src/app/static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. pred_path: {pred_summary_path} debug!!!')
     if pred_summary_path.exists():
@@ -113,7 +114,7 @@ def predict():
         return json_data  # Return the JSON response to the client
     else:
         return f'prediction: {prediction_id}/{original_img_path}. prediction result not found', 404
-
+"""
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8081)

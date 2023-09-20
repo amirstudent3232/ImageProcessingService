@@ -80,26 +80,15 @@ class QuoteBot(Bot):
             self.send_text_with_quote(msg['chat']['id'], msg["text"], quoted_msg_id=msg["message_id"])
 
 
-def swear_words_github():
-    repo = ('https://raw.githubusercontent.com/MoshikoZana/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words'
-            '/master/en')
-    response = requests.get(repo)
-    if response.status_code == 200:
-        swear_words = [line.strip() for line in response.text.split('\n')]
-        return swear_words
-
-
 class ObjectDetectionBot(Bot):
     def __init__(self, token, telegram_chat_url=None):
         super().__init__(token, telegram_chat_url)
         self.s3_client = boto3.client('s3')
         self.swear_words_count = 0
         self.swear_words = swear_words_github()
-        self.default_response = "Sorry, I didn't understand that. Type /help for available commands."
+        self.default_response = "i can only decode pictures"
         self.swear_response = [
-            "Excuse me... who do you think I am that you're being filthy here? Stop it.",
-            "Seriously? You're just going to continue to swear? I'm an image processing bot not a prostitute!",
-            "(╯°□°)╯︵ ┻━┻ WHAT'S WRONG WITH YOU!"
+            "please send me only photos"
         ]
 
     def handle_message(self, msg):
@@ -108,55 +97,19 @@ class ObjectDetectionBot(Bot):
         # Check if the message contains a photo
         if self.is_current_msg_photo(msg):
             caption = msg.get('caption', '').lower()
-
-            # Check if the caption contains a filter keyword, e.g., 'rotate', 'blur', or 'contour'
-            if 'rotate' in caption:
-                photo_download = self.download_user_photo(msg)
-                image = Img(photo_download)
-                image.rotate()
-                rotated_image = image.save_img()
-                self.send_photo(msg['chat']['id'], rotated_image)
-
-            elif 'blur' in caption:
-                photo_download = self.download_user_photo(msg)
-                image = Img(photo_download)
-                image.blur()
-                blured_image = image.save_img()
-                self.send_photo(msg['chat']['id'], blured_image)
-
-            elif 'contour' in caption:
-                photo_download = self.download_user_photo(msg)
-                image = Img(photo_download)
-                image.contour()
-                contour_image = image.save_img()
-                self.send_photo(msg['chat']['id'], contour_image)
-
-            else:
-                # If no filter keyword is found, perform object detection
-                photo_download = self.download_user_photo(msg)
-                s3_bucket = "moshikosbucket"
-                img_name = f'tg-photos/{photo_download}'
-                self.s3_client.upload_file(photo_download, s3_bucket, img_name)
-                yolo_summary = self.yolo5_request(img_name)  # Get YOLOv5 summary
-                self.send_summary_to_user(msg['chat']['id'], yolo_summary)
+            # If no filter keyword is found, perform object detection
+            photo_download = self.download_user_photo(msg)
+            s3_bucket = "sherman3"
+            img_name = f'tg-photos/{photo_download}'
+            self.s3_client.upload_file(photo_download, s3_bucket, img_name)
+            yolo_summary = self.yolo5_request(img_name)  # Get YOLOv5 summary
+            self.send_summary_to_user(msg['chat']['id'], yolo_summary)
 
         else:
             # Handle non-photo messages (e.g., text)
             if 'text' in msg:
                 message = msg['text'].lower()
-
-                if message.startswith('/start'):
-                    start_response = "Hey there! Welcome to Image Processing Bot! For available commands type \"/help\""
-                    self.send_text(msg['chat']['id'], start_response)
-
-                elif message.startswith('/help'):
-                    help_response = (
-                        "How to use Image Processing Bot: \nSimply upload a photo to me, and add your desired "
-                        "filter in the caption.\nSupported filters are Rotate, Blur, Contour, Salt n pepper, "
-                        "concat and segment. To use object detection, upload a photo without a caption.")
-                    self.send_text(msg['chat']['id'], help_response)
-                else:
-                    self.handle_non_command(msg, message)
+                self.handle_non_command(msg, message)
 
     def yolo5_request(self, s3_photo_path):
         yolo5_api = "http://localhost:8081/predict"
@@ -195,16 +148,7 @@ class ObjectDetectionBot(Bot):
             self.send_text(chat_id, "No objects detected in the image.")
 
     def handle_non_command(self, msg, message):
-        if message in self.swear_words:
-            bot_response = self.swear_response[self.swear_words_count % len(self.swear_response)]
-            self.swear_words_count = (self.swear_words_count + 1) % len(self.swear_response)
-            self.send_text(msg['chat']['id'], bot_response)
-        elif 'thanks' in message or 'thank' in message:
-            gratitude_response = ("You're welcome! If you need any further assistance, try using the available "
-                                  "commands :)")
-            self.send_text(msg['chat']['id'], gratitude_response)
-        else:
-            self.send_text(msg['chat']['id'], self.default_response)
+        self.send_text(msg['chat']['id'], self.default_response)
 
 #
 #         # TODO upload the photo to S3

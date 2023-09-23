@@ -91,7 +91,6 @@ class ObjectDetectionBot(Bot):
         # Check if the message contains a photo
         if self.is_current_msg_photo(msg):
             caption = msg.get('caption', '').lower()
-            # If no filter keyword is found, perform object detection
             photo_download = self.download_user_photo(msg)
             s3_bucket = "sherman3"
             img_name = f'tg-photos/{photo_download}'
@@ -140,9 +139,7 @@ class ObjectDetectionBot(Bot):
             self.send_text(chat_id, summary_str)
         else:
             self.send_text(chat_id, "No objects detected in the image.")
-"""
-    def handle_non_command(self, msg, message):
-        self.send_text(msg['chat']['id'], self.default_response)"""
+
 
 #
 #         # TODO upload the photo to S3

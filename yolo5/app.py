@@ -70,12 +70,6 @@ def predict():
     os.rename(f'/usr/src/app/static/data/{prediction_id}/{predicted_img_name}',
               f'/usr/src/app/static/data/{prediction_id}/{filename}')  # rename the file back after upload
 
-    # /usr/src/app/static/data/c98f54ac-bbf2-407f-aa88-4e5685520e8c/labels/street.txt - path in container
-
-    # /usr/src/app/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
-    # /usr/src/apps/static/data/ff3bd5be-e55e-4b70-b4d8-b5031557e531/labels
-
-    # Parse prediction labels and create a summary
 
     pred_summary_path = Path(f'/usr/src/app/static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
     logger.info(f'prediction: {prediction_id}, path: {original_img_path}. pred_path: {pred_summary_path} debug!!!')

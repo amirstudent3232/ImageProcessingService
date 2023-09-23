@@ -1,7 +1,6 @@
 import flask
 from flask import request
 import os
-from bot import Bot, QuoteBot
 from bot import ObjectDetectionBot
 
 

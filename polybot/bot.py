@@ -3,7 +3,7 @@ from loguru import logger
 import os
 import time
 from telebot.types import InputFile
-from polybot.img_proc import Img
+# from polybot.img_proc import Img
 import requests
 import boto3
 import json
@@ -81,9 +81,8 @@ class QuoteBot(Bot):
 
 
 class ObjectDetectionBot(Bot):
-    def __init__(self, token, telegram_chat_url=None):
-        super().__init__(token, telegram_chat_url)
-        self.s3_client = boto3.client('s3')
+
+    s3_client = boto3.client('s3')
 
     def handle_message(self, msg):
         logger.info(f'Incoming message: {msg}')

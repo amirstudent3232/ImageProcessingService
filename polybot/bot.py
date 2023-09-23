@@ -84,12 +84,6 @@ class ObjectDetectionBot(Bot):
     def __init__(self, token, telegram_chat_url=None):
         super().__init__(token, telegram_chat_url)
         self.s3_client = boto3.client('s3')
-        self.swear_words_count = 0
-        self.swear_words = swear_words_github()
-        self.default_response = "i can only decode pictures"
-        self.swear_response = [
-            "please send me only photos"
-        ]
 
     def handle_message(self, msg):
         logger.info(f'Incoming message: {msg}')
@@ -108,7 +102,7 @@ class ObjectDetectionBot(Bot):
         else:
             # Handle non-photo messages (e.g., text)
             if 'text' in msg:
-                message = msg['text'].lower()
+                message = msg['please send  only photos'].lower()
                 self.handle_non_command(msg, message)
 
     def yolo5_request(self, s3_photo_path):
@@ -146,9 +140,9 @@ class ObjectDetectionBot(Bot):
             self.send_text(chat_id, summary_str)
         else:
             self.send_text(chat_id, "No objects detected in the image.")
-
+"""
     def handle_non_command(self, msg, message):
-        self.send_text(msg['chat']['id'], self.default_response)
+        self.send_text(msg['chat']['id'], self.default_response)"""
 
 #
 #         # TODO upload the photo to S3

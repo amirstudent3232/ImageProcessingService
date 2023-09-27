@@ -99,7 +99,7 @@ class ObjectDetectionBot(Bot):
         return yolo5_api"""
 
     def yolo5_request(self, s3_photo_path):
-        yolo5_api = "http://localhost:8081/predict"
+        yolo5_api = "http://shermanpolybot:8081/predict"
         response = requests.post(f"{yolo5_api}?imgName={s3_photo_path}")
 
         if response.status_code == 200:
@@ -134,6 +134,3 @@ class ObjectDetectionBot(Bot):
         else:
             self.send_text(chat_id, "No objects detected in the image.")
 
-        # TODO upload the photo to S3
-        # TODO send a request to the `yolo5` service for prediction
-        # TODO send results to the Telegram end-user

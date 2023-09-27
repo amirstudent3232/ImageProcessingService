@@ -93,11 +93,6 @@ class ObjectDetectionBot(Bot):
         print(yolo_summary)
         self.send_summary_to_user(msg['chat']['id'], yolo_summary)
 
-    """def yolo5_requst(self, img_name):
-        yolo5_api = "http://localhost:8081"
-        response = requests.post(f"{yolo5_api}?imgName={s3_photo_path}")
-        return yolo5_api"""
-
     def yolo5_request(self, s3_photo_path):
         yolo5_api = "http://shermanpolybot:8081/predict"
         response = requests.post(f"{yolo5_api}?imgName={s3_photo_path}")
@@ -133,4 +128,3 @@ class ObjectDetectionBot(Bot):
             self.send_text(chat_id, summary_str)
         else:
             self.send_text(chat_id, "No objects detected in the image.")
-

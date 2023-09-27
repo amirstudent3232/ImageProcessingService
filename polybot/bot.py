@@ -3,7 +3,6 @@ from loguru import logger
 import os
 import time
 from telebot.types import InputFile
-from polybot.img_proc import Img
 import requests
 import boto3
 import json

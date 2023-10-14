@@ -94,7 +94,7 @@ class ObjectDetectionBot(Bot):
         self.send_summary_to_user(msg['chat']['id'], yolo_summary)
 
     def yolo5_request(self, s3_photo_path):
-        yolo5_api = "http://shermanpolybot:8081/predict"
+        yolo5_api = "http://amircontaineryolo:8081/predict"
         response = requests.post(f"{yolo5_api}?imgName={s3_photo_path}")
 
         if response.status_code == 200:
